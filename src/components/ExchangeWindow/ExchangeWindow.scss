@@ -1,0 +1,35 @@
+.MuiPaper-root {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 754px;
+  height: 344px;
+  padding: 28px 32px;
+  box-sizing: border-box;
+}
+
+.MuiButton- {
+
+  &root {
+    bottom: 0px;
+    width: 125px;
+    height: 48px;
+
+    & span {
+      font-size: 14px;
+      text-transform: capitalize;
+    }
+  }
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  flex: 0 1 100%;
+  height: 48px;
+}
+
+.tradeWindow {
+  flex: 1 0 50%;
+  height: 240px;
+}
