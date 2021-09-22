@@ -1,136 +1,152 @@
-import { React, useState, useEffect, useRef } from "react";
+
+import { useHistory } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useDebounceCallback } from '@react-hook/debounce';
+import { useState, useEffect, useRef } from "react";
 import { Paper, Button } from '@material-ui/core';
+import * as actions from "../../actions";
+import * as CONSTANTS from '../../_constants';
 import './ExchangeWindow.scss';
 import axios from 'axios';
-import CONSTANTS from '../../constants/constants';
-import { useDebounceCallback } from '@react-hook/debounce'
-import { BrowserRouter as Router, Route, Switch, useHistory } from 'react-router-dom';
 
-
+ 
 function ExchangeWindow () {
-  const [invoice, setInvoices] = useState([]);
-  const [withdraw, setWithdraw] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [calculations, setCalculations] = useState({
-    invoiceId: '6',
-    invoiceAmount: '',
-    withdrawId: '4',
-    withdrawAmount: '',
-  });
+  // const [invoicesList, setInvoicesList] = useState([]);
+  // const [withdrawalsList, setWithdrawalsList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);  
   const refCalculations = useRef();
   const page = useHistory();
+  const reduxCalculations = useSelector(state => state.calculations);
+  const reduxInvoicesList = useSelector(state => state.paymentsLists.invoicesList);
+  const reduxWithdrawalsList = useSelector(state => state.paymentsLists.withdrawalsList);
+  const dispatch =  useDispatch();
+  const setReduxCalculations = (a) => dispatch(actions.updateCalculations(a));
+  
 
-  refCalculations.current = calculations;
+
+  refCalculations.current = reduxCalculations;
+  const [lastValidCalculations, setLastValidCalculations] = useState({ ...reduxCalculations });
+  
 
 
   useEffect(() => {
-    setRefreshing(true);
-    axios.get(CONSTANTS.payMethods)
-      .then(res => {
+    // setRefreshing(true);
+    dispatch(actions.updateInvoicesList());
+    // setRefreshing(false);
+    
+
+    // axios.get(CONSTANTS.PAY_METHODS)
+    //   .then(res => {
+    //     setPaymentsLists([ ...res.data.invoice ], [ ...res.data.withdraw ]);
         
-        setInvoices(prev => ([...res.data.invoice]));
-        setWithdraw(prev => ([...res.data.withdraw]));
-        setRefreshing(false);
-      }
-    );
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    //     
+    //   }
+    // );
+
+    setReduxCalculations({
+      invoiceId: '6',
+      invoiceAmount: '',
+      withdrawId: '4',
+      withdrawAmount: '',
+    })
+
+    console.log(reduxCalculations);
+  }, []) 
 
   const numberValidator = (num) => {
     if (num === '') {
       return num;
-    } 
-    return /^[0-9]{0,9}([,.][0-9]{0,8})?$/.test(num) ? num.replace(',', '.') : false;
+    }
+    
+    return new RegExp(`^[0-9]{0,` + CONSTANTS.MAX_INTEGERS + `}([,.][0-9]{0,` + CONSTANTS.MAX_DECIMALS + `})?$`).test(num) ? num.replace(',', '.') : false;
   }
 
   const calculate = (e) => {
     e.preventDefault();
-    console.log(e.target.value);
     
     let event = numberValidator(e.target.value) !== false ? {[e.target.name]: numberValidator(e.target.value)} : {} ;
     let newCalculations;
-    console.log(numberValidator(e.target.value), calculations[e.target.name])
 
     if(e.target.value === '') {
-      newCalculations = {...calculations, ...{invoiceAmount: '', withdrawAmount: ''}};
-      setCalculations({ ...newCalculations });
-      dbRR(false);
+      newCalculations = {...reduxCalculations, ...{invoiceAmount: '', withdrawAmount: ''}};
+      setReduxCalculations({ ...newCalculations });
+      if (JSON.stringify(lastValidCalculations) === JSON.stringify(newCalculations)) {
+        debounceRateRefresh('stop');
+      }
       return;
     } else if (!numberValidator(e.target.value)) {
-      dbRR(false);
+      if (JSON.stringify(lastValidCalculations) === JSON.stringify(newCalculations)) {
+        debounceRateRefresh('stop');
+      }
       return;
     } else if (+e.target.value === 0) {
-      console.log('zero')
-      newCalculations = {...calculations, ...{invoiceAmount: e.target.value, withdrawAmount: e.target.value}};
-      setCalculations({ ...newCalculations });
-      dbRR(false);
+      newCalculations = {...reduxCalculations, ...{invoiceAmount: e.target.value, withdrawAmount: e.target.value}};
+      setReduxCalculations({ ...newCalculations });
+      debounceRateRefresh('stop');
       return;
     }
 
-    newCalculations = {...calculations, ...event};
+    newCalculations = {...reduxCalculations, ...event};
 
-    setCalculations({ ...newCalculations });
+    setReduxCalculations({ ...newCalculations });
     let isInvoice = (e.target.name === "invoiceId" || e.target.name === "invoiceAmount") ? true : false;
-    console.log(isInvoice, e.target.name, newCalculations, calculations);
 
-    dbRR(
+    if (JSON.stringify(lastValidCalculations) === JSON.stringify(newCalculations)) {
+      return;
+    }
+
+    setLastValidCalculations({ ...newCalculations });
+
+    debounceRateRefresh(
       true,
       isInvoice ? 'invoice' : 'withdraw',
       isInvoice ? newCalculations.invoiceAmount : newCalculations.withdrawAmount,
       newCalculations.invoiceId,
       newCalculations.withdrawId,
       newCalculations
-    );
+    )
+    
   }
 
-  const rateRefresh = (work, base, amount, invoicePayMethod, withdrawPayMethod, newCalculations) => {
-    if (!work) {
+  const rateRefresh = (stop, base, amount, invoicePayMethod, withdrawPayMethod, newCalculations) => {
+    if (stop === 'stop' || (+amount * 1) === 0 || amount === '.') {
       return;
     }
-    let newRate = '';
+    let newRate;
     let isInvoice = base === "invoice" ? true : false;
-    axios.get(CONSTANTS.payMethods + '/calculate?' + new URLSearchParams({
-      base: base,
-      amount: amount,
-      invoicePayMethod: invoicePayMethod,
-      withdrawPayMethod: withdrawPayMethod,
+    axios.get(CONSTANTS.PAY_METHODS + '/calculate?' + new URLSearchParams({
+      base,
+      amount,
+      invoicePayMethod,
+      withdrawPayMethod,
     })).then(res => {
       newRate = res.data.amount;
       isInvoice ? newCalculations.withdrawAmount = newRate : newCalculations.invoiceAmount = newRate;
-      console.log(calculations.invoiceAmount);
       isInvoice ? newCalculations.invoiceAmount = refCalculations.current.invoiceAmount : newCalculations.withdrawAmount = refCalculations.current.withdrawAmount;
       if (isInvoice && refCalculations.current.invoiceAmount === '') {
         newCalculations.withdrawAmount = '';
       } else if (!isInvoice && refCalculations.current.withdrawAmount === '') {
         newCalculations.invoiceAmount = '';
       }
-
-      setCalculations({ ...newCalculations });
+      setReduxCalculations({ ...newCalculations });
     });
   }
 
-  const dbRR = useDebounceCallback((...args) => rateRefresh(...args), 300);
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-    console.log('confirm');
-    page.push('/confirmation')
-    return;
-  }
+  const debounceRateRefresh = useDebounceCallback((...args) => rateRefresh(...args), CONSTANTS.DEBOUNCE_TIMER);
   
-
   return (
     <Paper elevation={5}>
       <div className={'tradeWindow'}>
         <h1>Sell</h1>
         
-        <form onSubmit={submitHandler}>
+        <form onSubmit={() => page.push('/confirmation')}>
           <select
             name="invoiceId"
             onChange={calculate}
-            value={calculations.invoiceId}
+            value={reduxCalculations.invoiceId}
             disabled={refreshing ? 'disabled' : false}
           >
-            {invoice.map(invoice => (
+            {reduxInvoicesList.map(invoice => (
               <option value={invoice.id} key={invoice.id}>{invoice.name}</option>
             ))}
           </select>
@@ -139,7 +155,7 @@ function ExchangeWindow () {
             type="text"
             name="invoiceAmount"
             onInput={calculate}
-            value={calculations.invoiceAmount}
+            value={reduxCalculations.invoiceAmount}
             placeholder="0"
             disabled={refreshing ? 'disabled' : false}
           />
@@ -149,14 +165,14 @@ function ExchangeWindow () {
       <div className={'tradeWindow'}>
         <h1>Buy</h1>
         
-        <form onSubmit={submitHandler}>
+        <form onSubmit={() => page.push('/confirmation')}> 
           <select
             name="withdrawId"
             onChange={calculate}
-            value={calculations.withdrawId}
+            value={reduxCalculations.withdrawId}
             disabled={refreshing ? 'disabled' : false}
           >
-            {withdraw.map(withdraw => (
+            {reduxWithdrawalsList.map(withdraw => (
               <option value={withdraw.id} key={withdraw.id}>{withdraw.name}</option>
             ))}
           </select>
@@ -165,16 +181,15 @@ function ExchangeWindow () {
             type="text"
             name="withdrawAmount"
             onInput={calculate}
-            value={calculations.withdrawAmount}
+            value={reduxCalculations.withdrawAmount}
             placeholder="0"
             disabled={refreshing ? 'disabled' : false}
           />
         </form>
       </div>
 
-
       <div className={'buttonWrapper'}>
-        <Button variant='contained' color='primary' disabled={false} onClick={submitHandler}>
+        <Button variant='contained' color='primary' disabled={false} onClick={() => page.push('/confirmation')}>
           Exchange
         </Button>
       </div>
