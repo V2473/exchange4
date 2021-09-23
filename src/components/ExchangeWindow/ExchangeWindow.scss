@@ -1,4 +1,4 @@
-.MuiPaper-root {
+.exchange {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -6,20 +6,9 @@
   height: 344px;
   padding: 28px 32px;
   box-sizing: border-box;
-}
-
-.MuiButton- {
-
-  &root {
-    bottom: 0px;
-    width: 125px;
-    height: 48px;
-
-    & span {
-      font-size: 14px;
-      text-transform: capitalize;
-    }
-  }
+  box-shadow: 0px 8px 28px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgb(221, 221, 221);
 }
 
 .buttonWrapper {
@@ -27,9 +16,28 @@
   justify-content: center;
   flex: 0 1 100%;
   height: 48px;
+  margin: 0 0 20px;
+  transform: translateY(-20px);
 }
 
 .tradeWindow {
   flex: 1 0 50%;
   height: 240px;
+}
+
+.btn-exchange {
+  bottom: 0px;
+  width: 125px;
+  height: 48px;
+  margin: -10px 0 40px;
+
+  & span {
+    font-size: 14px;
+    text-transform: capitalize;
+  }
+}
+
+h1 {
+  font-weight: 700;
+  margin: 0 0 30px;
 }

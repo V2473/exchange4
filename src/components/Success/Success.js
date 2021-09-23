@@ -1,5 +1,6 @@
 import { useHistory } from 'react-router-dom';
-import { Paper, Button } from '@material-ui/core';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import classnames from 'classnames';
 import './Success.scss';
 
 function Success () {
@@ -7,14 +8,22 @@ function Success () {
   const page = useHistory();
 
   return (
-    <Paper elevation={5}>
+    <div elevation={5} className={"success"}>
+      <div className={'success-img'}></div>
       <h1>Success</h1>
+      <p> Your exchange order has been placed <br /> successfully and will be processed soon.</p>
       <div className={'buttonWrapper'}>
-        <Button variant='contained' color='primary' disabled={false} onClick={() => page.push('./')}>
+        <button
+          className={classnames("btn","btn-primary","btn-confirm","btn-success_")}
+          variant='contained'
+          color='primary'
+          disabled={false}
+          onClick={() => page.push('./')}
+        >
           Home
-        </Button>
+        </button>
       </div>
-    </Paper>
+    </div>
   );
 }
 

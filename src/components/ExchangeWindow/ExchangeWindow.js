@@ -1,49 +1,52 @@
-import { useHistory } from 'react-router-dom';
+import calculationsToInt from '../../Logic/calculationsToInt';
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from "react";
-import { Paper, Button } from '@material-ui/core';
 import * as actions from "../../redux/actions";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { useHistory } from 'react-router-dom';
+import classnames from 'classnames';
+import { useEffect } from "react";
 import './ExchangeWindow.scss';
 
 function ExchangeWindow () {
-  const page = useHistory();
   const dispatch =  useDispatch();
+  const page = useHistory();
 
-  const calculations = useSelector(state => state.calculations);
-  const invoicesList = useSelector(state => state.paymentsLists.invoicesList);
   const withdrawalsList = useSelector(state => state.paymentsLists.withdrawalsList);
-  const isRefreshing = useSelector(state => state.isRefreshing);
-  const isCalculating = useSelector(state => state.isCalculating);
+  const invoicesList = useSelector(state => state.paymentsLists.invoicesList);
   const isEmptyAmounts = useSelector(state => state.isEmptyAmounts);
+  const isCalculating = useSelector(state => state.isCalculating);
+  const calculations = useSelector(state => state.calculations);
+  const isRefreshing = useSelector(state => state.isRefreshing);
 
+  const updateCalculations = (...args) => dispatch(actions.updateCalculations(...args))
   const calculate = (e) => dispatch(actions.calculate(e));
+  const setIsBidSuccess = (bool) => dispatch(actions.isBidSuccess(bool))
+
   
   useEffect(() => {
     dispatch(actions.updatePaymentsList());
+    setIsBidSuccess(true);
     // eslint-disable-next-line 
   }, []) 
 
-
-
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
 
-    const isSubmitForbidden = (isCalculating || isRefreshing || isEmptyAmounts);
+    if (!isCalculating && !isRefreshing && !isEmptyAmounts) {
+      updateCalculations((calculationsToInt(calculations)));
 
-    if (isSubmitForbidden) {
-      return;
+      page.push('/confirmation');
     }
-
-    page.push('/confirmation')
   }
 
   return (
-    <Paper elevation={5}>
+    <div elevation={5} className={"exchange"}>
       <div className={'tradeWindow'}>
         <h1>Sell</h1>
         
         <form onSubmit={submitHandler}>
           <select
+            className={'form-select'}
             name="invoiceId"
             onChange={calculate}
             value={calculations.invoiceId}
@@ -55,6 +58,7 @@ function ExchangeWindow () {
           </select>
           <br />
           <input
+            className={'form-control'}
             type="text"
             name="invoiceAmount"
             onInput={calculate}
@@ -70,7 +74,7 @@ function ExchangeWindow () {
         
         <form onSubmit={submitHandler}> 
           <select
-            className={'custom-select'}
+            className={'form-select'}
             name="withdrawId"
             onChange={calculate}
             value={calculations.withdrawId}
@@ -82,6 +86,7 @@ function ExchangeWindow () {
           </select>
           <br />
           <input
+            className={'form-control'}
             type="text"
             name="withdrawAmount"
             onInput={calculate}
@@ -93,11 +98,16 @@ function ExchangeWindow () {
       </div>
 
       <div className={'buttonWrapper'}>
-        <Button variant='contained' color='primary' disabled={isCalculating || isRefreshing || isEmptyAmounts} onClick={submitHandler}>
+        <button
+          type="button"
+          className={classnames("btn","btn-primary","btn-exchange")}
+          disabled={isCalculating || isRefreshing || isEmptyAmounts}
+          onClick={submitHandler}
+        >
           Exchange
-        </Button>
+        </button>
       </div>
-    </Paper>
+    </div>
   );
 }
 

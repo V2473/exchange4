@@ -1,15 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
-import createSagaMiddleware from 'redux-saga'
-import rootReducer from './redux/reducers';
-import './index.scss';
-import App from './App';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import sagaWatcher from './redux/saga/sagas';
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import sagaWatcher from './redux/saga/sagas';
+import rootReducer from './redux/reducers';
+import { Provider } from 'react-redux';
+import ReactDOM from 'react-dom';
+import React from 'react';
+import App from './App';
+import './index.scss';
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
