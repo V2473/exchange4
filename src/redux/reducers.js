@@ -1,6 +1,14 @@
 import { combineReducers } from "redux";
 import * as actionTypes from './actionTypes';
 
+
+let isEmptyAmounts = (state = true, action) => {
+  switch(action.type) {
+    case actionTypes.IS_EMPTY_AMOUNTS:
+      return action.payload;
+    default: return state;
+  }
+}
 let isRefreshing = (state = false, action) => {
   switch(action.type) {
     case actionTypes.IS_REFRESHING:
@@ -9,8 +17,20 @@ let isRefreshing = (state = false, action) => {
   }
 }
 
+let isCalculating = (state = false, action) => {
+  switch(action.type) {
+    case actionTypes.IS_CALCULATING:
+      return action.payload;
+    default: return state;
+  }
+}
 
-let calculations = (state = {}, action) => {
+let calculations = (state = {
+  invoiceId: '6',
+  invoiceAmount: '',
+  withdrawId: '4',
+  withdrawAmount: '',
+}, action) => {
   switch (action.type) {
     case actionTypes.UPDATE_CALCULATIONS:
       return {
@@ -41,6 +61,8 @@ const rootReducer = combineReducers({
   calculations,
   paymentsLists,
   isRefreshing,
+  isCalculating,
+  isEmptyAmounts,
 });
 
 export default rootReducer;

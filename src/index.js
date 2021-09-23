@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga'
-import rootReducer from './reducers';
+import rootReducer from './redux/reducers';
 import './index.scss';
 import App from './App';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import sagaWatcher from './sagas';
+import sagaWatcher from './redux/saga/sagas';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 const sagaMiddleware = createSagaMiddleware();
