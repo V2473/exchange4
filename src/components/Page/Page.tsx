@@ -8,13 +8,11 @@ import classnames from 'classnames';
 import { User } from '../../types/types';
 import React from 'react';
 
-
 interface Props {
   users: User[];
   currentPage: number;
   pagesTotal: number;
 }
-
 
 function Page(props: Props): JSX.Element {
   const emptyUser = {

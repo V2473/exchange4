@@ -6,10 +6,6 @@ export interface User {
   avatar: string | null;
 }
 
-export interface UsersList {
-  [index: number]: User;
-}
-
 export interface Action<T> {
   type: T;
 }

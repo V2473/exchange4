@@ -7,7 +7,6 @@ import { User } from '../../types/types';
 import { useAppDispatch } from '../../hooks/hooks'
 import React from 'react';
 
-
 interface Props {
   user: User;
   edit?: boolean;

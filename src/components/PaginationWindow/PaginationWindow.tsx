@@ -9,8 +9,6 @@ import * as actions from "../../redux/actions";
 import Page from '../Page/Page';
 import React from 'react';
 
-
-
 function PaginationWindow(): JSX.Element {
   const dispatch =  useAppDispatch();
   const usersList = useAppSelector(state => state.usersList) || [] ;

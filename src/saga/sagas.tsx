@@ -4,7 +4,6 @@ import * as actionTypes from '../redux/actionTypes';
 import * as Types from '../types/types'
 
 function* requestUsersLists() {
-
   const payload: Types.User[] = yield requests.getUsersRequest();
   yield put({ type: actionTypes.UPDATE_USERS_LIST, payload: [...payload ]})
 }
