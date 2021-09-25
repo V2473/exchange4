@@ -1,4 +1,2 @@
-Test case of Exchange input
-
-Used technologies:
-React, Redux, Saga, Sass, Bootstrap, etc..
+Стек технологий :
+React, Redux, Saga, Axios, React-router-dom.
