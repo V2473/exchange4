@@ -5,13 +5,15 @@ import * as actions from "../../redux/actions";
 import classnames from 'classnames';
 import { User } from '../../types/types';
 import { useAppDispatch } from '../../hooks/hooks'
+import React from 'react';
+
 
 interface Props {
   user: User;
   edit?: boolean;
 }
 
-const UserCard = (props: Props) => {
+const UserCard = (props: Props): JSX.Element => {
   const [user, setUser] = useState({ ...props.user })
   const [editMode, setEditMode] = useState(props.edit)
   const [isEmptyField, setIsEmptyField] = useState(true)

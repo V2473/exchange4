@@ -7,12 +7,13 @@ import { useAppSelector, useAppDispatch } from '../../hooks/hooks';
 import { useEffect } from "react";
 import * as actions from "../../redux/actions";
 import Page from '../Page/Page';
+import React from 'react';
 
 
-function PaginationWindow() {
+
+function PaginationWindow(): JSX.Element {
   const dispatch =  useAppDispatch();
-  let usersList = useAppSelector(state => state.usersList);
-  usersList = usersList === undefined ? [] : usersList;
+  const usersList = useAppSelector(state => state.usersList) || [] ;
   const location = useLocation();
   const currentPage = +location.pathname.slice(1);
   const pagesTotal = Math.ceil(usersList.length / 5);
@@ -20,7 +21,6 @@ function PaginationWindow() {
 
   useEffect(() => {
     dispatch(actions.requestUsersList())
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
